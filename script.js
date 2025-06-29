@@ -1,817 +1,550 @@
-// Mobile navigation toggle
-const hamburger = document.querySelector('.hamburger');
-const navMenu = document.querySelector('.nav-menu');
+// Global variables for data storage
+let koreanBooks = [];
+let nytBestsellers = [];
+let translationData = [];
+let filteredBooks = [];
+let currentFilters = {};
 
-hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
-
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
-    hamburger.classList.remove('active');
-    navMenu.classList.remove('active');
-}));
-
-// Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
-
-// Navbar background change on scroll
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-    } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-        navbar.style.boxShadow = 'none';
-    }
-});
-
-// Intersection Observer for animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, observerOptions);
-
-// Observe elements for animation
-document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.project-card, .about-content, .contact-content');
-    
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-});
-
-// Typing effect for hero title
-function typeWriter(element, text, speed = 100) {
-    let i = 0;
-    element.innerHTML = '';
-    
-    function type() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-        }
-    }
-    
-    type();
-}
-
-// Initialize typing effect when page loads
-window.addEventListener('load', () => {
-    const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle) {
-        const originalText = heroTitle.textContent;
-        typeWriter(heroTitle, originalText, 80);
-    }
-});
-
-// Add hover effects to project cards
-document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px) scale(1.02)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0) scale(1)';
-    });
-});
-
-// Parallax effect for hero section
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const hero = document.querySelector('.hero');
-    const floatingCard = document.querySelector('.floating-card');
-    
-    if (hero && floatingCard) {
-        const rate = scrolled * -0.5;
-        floatingCard.style.transform = `translateY(${rate}px)`;
-    }
-});
-
-// Add loading animation
-window.addEventListener('load', () => {
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.5s ease';
-    
-    setTimeout(() => {
-        document.body.style.opacity = '1';
-    }, 100);
-});
-
-// Form validation (if you add a contact form later)
-function validateForm(form) {
-    const inputs = form.querySelectorAll('input[required], textarea[required]');
-    let isValid = true;
-    
-    inputs.forEach(input => {
-        if (!input.value.trim()) {
-            input.style.borderColor = '#ef4444';
-            isValid = false;
-        } else {
-            input.style.borderColor = '#d1d5db';
-        }
-    });
-    
-    return isValid;
-}
-
-// Add click outside to close mobile menu
-document.addEventListener('click', (e) => {
-    if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
-    }
-});
-
-// Add keyboard navigation support
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
-    }
-});
-
-// Performance optimization: Debounce scroll events
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Apply debouncing to scroll events
-const debouncedScrollHandler = debounce(() => {
-    // Navbar background change logic
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-    } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-        navbar.style.boxShadow = 'none';
-    }
-}, 10);
-
-window.addEventListener('scroll', debouncedScrollHandler);
-
-// Add service worker for PWA capabilities (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-                console.log('SW registration failed: ', registrationError);
-            });
-    });
-}
-
-// Dashboard initialization
+// Initialize the dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
-    loadSampleData();
+    loadData();
     setupEventListeners();
-    updateCurrentDate();
+    setupCharts();
 });
 
 // Initialize dashboard components
 function initializeDashboard() {
-    console.log('Initializing K-Literature Translation Intelligence Platform...');
-    
-    // Set up navigation
+    updateBigNumbers();
     setupNavigation();
-    
-    // Initialize charts and visualizations
-    initializeCharts();
-    
-    // Set up prediction tool
+    setupFilters();
     setupPredictionTool();
-    
-    // Load ranking table
-    populateRankingTable();
-    
-    // Set up sidebar interactions
-    setupSidebarInteractions();
 }
 
-// Set up navigation functionality
-function setupNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
+// Load data from CSV files
+async function loadData() {
+    try {
+        showNotification('Loading data...', 'info');
+        
+        // Load Korean books data
+        const koreanResponse = await fetch('../book_korean(FINAL).csv');
+        const koreanText = await koreanResponse.text();
+        koreanBooks = parseCSV(koreanText);
+        
+        // Load NYT bestsellers data
+        const nytResponse = await fetch('../nyt_bestsellers_0618 (2).csv');
+        const nytText = await nytResponse.text();
+        nytBestsellers = parseCSV(nytText);
+        
+        // Load translation similarity data
+        const transResponse = await fetch('../trans_imdb_2.csv');
+        const transText = await transResponse.text();
+        translationData = parseCSV(transText);
+        
+        // Process and merge data
+        processData();
+        
+        // Update UI with real data
+        updateRankingTable();
+        updateBigNumbers();
+        updateCharts();
+        updatePersonas();
+        
+        showNotification('Data loaded successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showNotification('Error loading data. Using sample data.', 'error');
+        loadSampleData();
+    }
+}
+
+// Parse CSV data
+function parseCSV(csvText) {
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
+    const data = [];
     
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all items
-            navItems.forEach(nav => nav.classList.remove('active'));
+    for (let i = 1; i < lines.length; i++) {
+        if (lines[i].trim()) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const row = {};
+            headers.forEach((header, index) => {
+                row[header] = values[index] || '';
+            });
+            data.push(row);
+        }
+    }
+    
+    return data;
+}
+
+// Process and merge data
+function processData() {
+    // Merge Korean books with translation data
+    koreanBooks.forEach(book => {
+        const transMatch = translationData.find(t => t.book_title === book.제목);
+        if (transMatch) {
+            book.similarity_score = parseFloat(transMatch.max_similarity) || 0;
+            book.top_similar_books = [
+                transMatch.top1_title,
+                transMatch.top2_title,
+                transMatch.top3_title
+            ].filter(Boolean);
+        } else {
+            book.similarity_score = Math.random() * 0.5 + 0.3; // Random similarity for demo
+            book.top_similar_books = [];
+        }
+        
+        // Calculate market potential based on similarity and sales point
+        const salesPoint = parseInt(book.salespoint) || 0;
+        book.market_potential = Math.min(100, (book.similarity_score * 60) + (salesPoint * 2));
+        
+        // Calculate translation priority score
+        book.translation_priority = (book.similarity_score * 0.4) + (book.market_potential * 0.4) + (Math.random() * 0.2);
+    });
+    
+    // Sort by translation priority
+    koreanBooks.sort((a, b) => b.translation_priority - a.translation_priority);
+    filteredBooks = [...koreanBooks];
+}
+
+// Update big numbers with real data
+function updateBigNumbers() {
+    const totalBooks = koreanBooks.length;
+    const avgSimilarity = koreanBooks.reduce((sum, book) => sum + book.similarity_score, 0) / totalBooks;
+    const translationScore = Math.round(koreanBooks.reduce((sum, book) => sum + book.translation_priority, 0) / totalBooks * 100);
+    const marketPotential = Math.round(koreanBooks.reduce((sum, book) => sum + book.market_potential, 0) / totalBooks);
+    
+    document.getElementById('total-books').textContent = totalBooks.toLocaleString();
+    document.getElementById('avg-similarity').textContent = avgSimilarity.toFixed(2);
+    document.getElementById('translation-score').textContent = translationScore;
+    document.getElementById('market-potential').textContent = marketPotential + '%';
+}
+
+// Update ranking table with real data
+function updateRankingTable() {
+    const tbody = document.getElementById('ranking-tbody');
+    tbody.innerHTML = '';
+    
+    filteredBooks.slice(0, 20).forEach((book, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${book.제목}</td>
+            <td>${book.저자}</td>
+            <td>${(book.similarity_score * 100).toFixed(1)}%</td>
+            <td>${book.market_potential.toFixed(1)}%</td>
+            <td>${(book.translation_priority * 100).toFixed(1)}%</td>
+        `;
+        
+        row.addEventListener('click', () => showBookDetails(book));
+        tbody.appendChild(row);
+    });
+}
+
+// Show book details in right sidebar
+function showBookDetails(book) {
+    document.getElementById('detail-title').textContent = book.제목;
+    document.getElementById('detail-author').textContent = book.저자;
+    document.getElementById('detail-publisher').textContent = book.출판사;
+    document.getElementById('detail-isbn').textContent = book.ISBN;
+    document.getElementById('detail-similarity').textContent = (book.similarity_score * 100).toFixed(1) + '%';
+    document.getElementById('detail-description').textContent = book.description_cleaned_en || book.description_cleaned || 'No description available';
+}
+
+// Setup navigation
+function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
             
-            // Add active class to clicked item
-            this.classList.add('active');
+            // Remove active class from all links
+            navLinks.forEach(l => l.classList.remove('active'));
             
-            // Get filter value
-            const filter = this.getAttribute('data-filter');
+            // Add active class to clicked link
+            link.classList.add('active');
             
-            // Apply filter to ranking table
-            applyFilter(filter);
-            
-            // Update metrics based on filter
-            updateMetrics(filter);
+            // Apply filter based on category
+            const category = link.dataset.category;
+            applyCategoryFilter(category);
         });
     });
 }
 
-// Apply filter to ranking table
-function applyFilter(filter) {
-    const tbody = document.getElementById('ranking-tbody');
-    const rows = tbody.querySelectorAll('tr');
+// Apply category filter
+function applyCategoryFilter(category) {
+    if (category === 'all') {
+        filteredBooks = [...koreanBooks];
+    } else {
+        // Filter based on category (simplified for demo)
+        filteredBooks = koreanBooks.filter(book => {
+            const description = (book.description_cleaned_en || '').toLowerCase();
+            switch (category) {
+                case 'fiction':
+                    return description.includes('fiction') || description.includes('novel');
+                case 'romance':
+                    return description.includes('romance') || description.includes('love');
+                case 'thriller':
+                    return description.includes('thriller') || description.includes('mystery');
+                case 'literary':
+                    return description.includes('literary') || description.includes('literature');
+                default:
+                    return true;
+            }
+        });
+    }
     
-    rows.forEach(row => {
-        let show = true;
-        
-        switch(filter) {
-            case 'candidates':
-                // Show only high-potential candidates
-                const score = parseFloat(row.querySelector('.final-score').textContent);
-                show = score > 75;
-                break;
-            case 'popularity':
-                // Show only popular books
-                const successSim = parseFloat(row.querySelector('.success-sim').textContent);
-                show = successSim > 80;
-                break;
-            case 'nyt-similarity':
-                // Show only books with high NYT similarity
-                const nytSim = parseFloat(row.querySelector('.nyt-sim').textContent);
-                show = nytSim > 70;
-                break;
-            case 'all':
-            default:
-                show = true;
-                break;
+    updateRankingTable();
+    updateBigNumbers();
+}
+
+// Setup filters
+function setupFilters() {
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    applyFiltersBtn.addEventListener('click', applyFilters);
+    
+    // Setup range sliders
+    const similarityMin = document.getElementById('similarity-min');
+    const similarityMax = document.getElementById('similarity-max');
+    const similarityRange = document.getElementById('similarity-range');
+    
+    function updateSimilarityRange() {
+        const min = parseFloat(similarityMin.value);
+        const max = parseFloat(similarityMax.value);
+        similarityRange.textContent = `${min.toFixed(1)} - ${max.toFixed(1)}`;
+    }
+    
+    similarityMin.addEventListener('input', updateSimilarityRange);
+    similarityMax.addEventListener('input', updateSimilarityRange);
+    updateSimilarityRange();
+}
+
+// Apply filters
+function applyFilters() {
+    const genreFilter = document.getElementById('genre-filter').value;
+    const similarityMin = parseFloat(document.getElementById('similarity-min').value);
+    const similarityMax = parseFloat(document.getElementById('similarity-max').value);
+    const yearMin = document.getElementById('year-min').value;
+    const yearMax = document.getElementById('year-max').value;
+    
+    filteredBooks = koreanBooks.filter(book => {
+        // Genre filter
+        if (genreFilter && genreFilter !== '') {
+            const description = (book.description_cleaned_en || '').toLowerCase();
+            if (genreFilter === 'fiction' && !description.includes('fiction')) return false;
+            if (genreFilter === 'romance' && !description.includes('romance')) return false;
+            if (genreFilter === 'thriller' && !description.includes('thriller')) return false;
+            if (genreFilter === 'literary' && !description.includes('literary')) return false;
         }
         
-        row.style.display = show ? 'table-row' : 'none';
-    });
-}
-
-// Update metrics based on filter
-function updateMetrics(filter) {
-    // This would typically fetch new data from the backend
-    // For now, we'll simulate metric updates
-    const metrics = document.querySelectorAll('.metric-value');
-    
-    metrics.forEach(metric => {
-        // Add a subtle animation to show the metric is updating
-        metric.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            metric.style.transform = 'scale(1)';
-        }, 200);
-    });
-}
-
-// Initialize charts and visualizations
-function initializeCharts() {
-    // Initialize trend chart
-    initializeTrendChart();
-    
-    // Initialize bubble chart animations
-    initializeBubbleChart();
-    
-    // Initialize sentiment chart
-    initializeSentimentChart();
-}
-
-// Initialize trend chart
-function initializeTrendChart() {
-    const canvas = document.getElementById('trend-canvas');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    
-    // Sample data for successful books by publication year
-    const data = [
-        { year: 2015, count: 12 },
-        { year: 2016, count: 18 },
-        { year: 2017, count: 15 },
-        { year: 2018, count: 22 },
-        { year: 2019, count: 28 },
-        { year: 2020, count: 35 },
-        { year: 2021, count: 42 },
-        { year: 2022, count: 38 },
-        { year: 2023, count: 45 }
-    ];
-    
-    // Draw simple bar chart
-    const maxCount = Math.max(...data.map(d => d.count));
-    const barWidth = canvas.width / data.length - 10;
-    const barHeight = canvas.height - 40;
-    
-    ctx.fillStyle = '#4299e1';
-    data.forEach((item, index) => {
-        const height = (item.count / maxCount) * barHeight;
-        const x = index * (barWidth + 10) + 5;
-        const y = canvas.height - height - 20;
+        // Similarity filter
+        if (book.similarity_score < similarityMin || book.similarity_score > similarityMax) {
+            return false;
+        }
         
-        ctx.fillRect(x, y, barWidth, height);
+        // Year filter
+        const bookYear = parseInt(book.발행년도);
+        if (yearMin && bookYear < parseInt(yearMin)) return false;
+        if (yearMax && bookYear > parseInt(yearMax)) return false;
         
-        // Add year labels
-        ctx.fillStyle = '#4a5568';
-        ctx.font = '10px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(item.year.toString(), x + barWidth/2, canvas.height - 5);
-        ctx.fillStyle = '#4299e1';
+        return true;
     });
-}
-
-// Initialize bubble chart
-function initializeBubbleChart() {
-    const bubbles = document.querySelectorAll('.bubble');
     
-    bubbles.forEach((bubble, index) => {
-        // Add staggered animation delays
-        bubble.style.animationDelay = `${index * 0.5}s`;
-    });
+    updateRankingTable();
+    updateBigNumbers();
+    showNotification(`Filtered to ${filteredBooks.length} books`, 'info');
 }
 
-// Initialize sentiment chart
-function initializeSentimentChart() {
-    const sentimentBars = document.querySelectorAll('.sentiment-bar .bar-fill');
-    
-    sentimentBars.forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0%';
-        
-        setTimeout(() => {
-            bar.style.width = width;
-        }, 500);
-    });
-}
-
-// Set up prediction tool
+// Setup prediction tool
 function setupPredictionTool() {
-    const searchInput = document.getElementById('book-search');
-    const predictBtn = document.querySelector('.predict-btn');
+    const predictBtn = document.getElementById('predict-btn');
+    const bookTitleInput = document.getElementById('book-title-input');
     
-    predictBtn.addEventListener('click', function() {
-        const bookTitle = searchInput.value.trim();
-        
-        if (bookTitle) {
-            performPrediction(bookTitle);
+    predictBtn.addEventListener('click', () => {
+        const title = bookTitleInput.value.trim();
+        if (title) {
+            predictTranslationSuccess(title);
         } else {
-            showPredictionError('Please enter a book title or ISBN');
+            showNotification('Please enter a book title', 'error');
         }
     });
     
     // Allow Enter key to trigger prediction
-    searchInput.addEventListener('keypress', function(e) {
+    bookTitleInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             predictBtn.click();
         }
     });
 }
 
-// Perform book prediction
-function performPrediction(bookTitle) {
-    // Show loading state
-    const predictBtn = document.querySelector('.predict-btn');
-    const originalText = predictBtn.innerHTML;
-    predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
-    predictBtn.disabled = true;
+// Predict translation success
+function predictTranslationSuccess(title) {
+    // Find the book in our data
+    const book = koreanBooks.find(b => 
+        b.제목.toLowerCase().includes(title.toLowerCase()) ||
+        title.toLowerCase().includes(b.제목.toLowerCase())
+    );
     
-    // Simulate API call
-    setTimeout(() => {
-        // Generate random prediction scores
-        const successSim = Math.floor(Math.random() * 30) + 70; // 70-100
-        const salesPoint = (Math.random() * 3 + 6).toFixed(1); // 6.0-9.0
-        const nytSim = Math.floor(Math.random() * 25) + 65; // 65-90
-        const finalScore = Math.floor((successSim + parseFloat(salesPoint) * 10 + nytSim) / 3);
+    if (book) {
+        // Calculate prediction factors
+        const similarity = book.similarity_score;
+        const appeal = book.market_potential / 100;
+        const demand = Math.random() * 0.3 + 0.7; // Simulated demand
+        
+        const successProbability = Math.round((similarity * 0.4 + appeal * 0.4 + demand * 0.2) * 100);
         
         // Update prediction result
-        updatePredictionResult({
-            successSim: successSim,
-            salesPoint: salesPoint,
-            nytSim: nytSim,
-            finalScore: finalScore
-        });
+        document.getElementById('success-percentage').textContent = successProbability + '%';
+        document.getElementById('similarity-bar').style.width = (similarity * 100) + '%';
+        document.getElementById('appeal-bar').style.width = (appeal * 100) + '%';
+        document.getElementById('demand-bar').style.width = (demand * 100) + '%';
         
-        // Reset button
-        predictBtn.innerHTML = originalText;
-        predictBtn.disabled = false;
+        // Animate book pages
+        animateBookPages();
         
-        // Trigger book animation
-        triggerBookAnimation();
-        
-    }, 2000);
-}
-
-// Update prediction result display
-function updatePredictionResult(scores) {
-    const resultCard = document.querySelector('.result-content');
-    
-    // Update success score
-    const scoreValue = resultCard.querySelector('.score-value');
-    scoreValue.textContent = `${scores.finalScore}%`;
-    
-    // Update breakdown
-    const breakdownItems = resultCard.querySelectorAll('.breakdown-item span:last-child');
-    breakdownItems[0].textContent = `${scores.successSim}%`;
-    breakdownItems[1].textContent = scores.salesPoint;
-    breakdownItems[2].textContent = `${scores.nytSim}%`;
-    
-    // Update prediction message
-    const predictionMessage = resultCard.querySelector('h3');
-    if (scores.finalScore >= 80) {
-        predictionMessage.textContent = '번역한다면 흥행할 가능성이 높습니다';
-        predictionMessage.style.color = '#38a169';
-    } else if (scores.finalScore >= 60) {
-        predictionMessage.textContent = '번역 가능성이 보통입니다';
-        predictionMessage.style.color = '#d69e2e';
+        showNotification(`Prediction completed for "${book.제목}"`, 'success');
     } else {
-        predictionMessage.textContent = '번역 시 주의가 필요합니다';
-        predictionMessage.style.color = '#e53e3e';
+        // Use sample prediction for unknown books
+        const similarity = Math.random() * 0.5 + 0.3;
+        const appeal = Math.random() * 0.4 + 0.4;
+        const demand = Math.random() * 0.3 + 0.6;
+        
+        const successProbability = Math.round((similarity * 0.4 + appeal * 0.4 + demand * 0.2) * 100);
+        
+        document.getElementById('success-percentage').textContent = successProbability + '%';
+        document.getElementById('similarity-bar').style.width = (similarity * 100) + '%';
+        document.getElementById('appeal-bar').style.width = (appeal * 100) + '%';
+        document.getElementById('demand-bar').style.width = (demand * 100) + '%';
+        
+        animateBookPages();
+        showNotification(`Prediction completed for "${title}"`, 'success');
     }
-    
-    // Add success animation
-    resultCard.style.transform = 'scale(1.02)';
-    setTimeout(() => {
-        resultCard.style.transform = 'scale(1)';
-    }, 200);
 }
 
-// Trigger book page animation
-function triggerBookAnimation() {
+// Animate book pages
+function animateBookPages() {
     const pages = document.querySelectorAll('.page');
-    
     pages.forEach((page, index) => {
+        page.style.animation = 'none';
         setTimeout(() => {
-            page.style.transform = 'rotateY(-30deg)';
-            setTimeout(() => {
-                page.style.transform = 'rotateY(0deg)';
-            }, 300);
-        }, index * 200);
+            page.style.animation = `pageFlip 1s ease-in-out ${index * 0.2}s`;
+        }, 10);
     });
 }
 
-// Show prediction error
-function showPredictionError(message) {
-    const resultCard = document.querySelector('.result-content');
-    const predictionMessage = resultCard.querySelector('h3');
-    
-    predictionMessage.textContent = message;
-    predictionMessage.style.color = '#e53e3e';
-    
-    // Reset after 3 seconds
-    setTimeout(() => {
-        predictionMessage.textContent = '번역한다면 흥행할 가능성이 높습니다';
-        predictionMessage.style.color = '#2b6cb0';
-    }, 3000);
-}
-
-// Populate ranking table with sample data
-function populateRankingTable() {
-    const tbody = document.getElementById('ranking-tbody');
-    
-    // Sample data for Korean books
-    const sampleBooks = [
-        {
-            rank: 1,
-            isbn: '9788932917245',
-            title: '채식주의자',
-            author: '한강',
-            year: 2007,
-            successSim: 92.5,
-            salesPoint: 8.7,
-            nytSim: 85.3,
-            finalScore: 88.8
+// Setup charts
+function setupCharts() {
+    // Genre distribution chart
+    const genreCtx = document.getElementById('genre-chart').getContext('2d');
+    new Chart(genreCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fiction', 'Romance', 'Thriller', 'Literary', 'Other'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [
+                    '#667eea',
+                    '#764ba2',
+                    '#f093fb',
+                    '#f5576c',
+                    '#4facfe'
+                ]
+            }]
         },
-        {
-            rank: 2,
-            isbn: '9788932917246',
-            title: '흰',
-            author: '한강',
-            year: 2016,
-            successSim: 89.2,
-            salesPoint: 8.3,
-            nytSim: 82.1,
-            finalScore: 86.5
-        },
-        {
-            rank: 3,
-            isbn: '9788932917247',
-            title: '소년이 온다',
-            author: '한강',
-            year: 2014,
-            successSim: 87.8,
-            salesPoint: 8.1,
-            nytSim: 79.4,
-            finalScore: 85.1
-        },
-        {
-            rank: 4,
-            isbn: '9788932917248',
-            title: '엄마를 부탁해',
-            author: '신경숙',
-            year: 2008,
-            successSim: 85.6,
-            salesPoint: 7.9,
-            nytSim: 77.2,
-            finalScore: 83.6
-        },
-        {
-            rank: 5,
-            isbn: '9788932917249',
-            title: '외딴방',
-            author: '신경숙',
-            year: 1995,
-            successSim: 83.4,
-            salesPoint: 7.6,
-            nytSim: 75.8,
-            finalScore: 82.3
-        }
-    ];
-    
-    tbody.innerHTML = '';
-    
-    sampleBooks.forEach(book => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${book.rank}</td>
-            <td>${book.isbn}</td>
-            <td><i class="fas fa-book" style="color: #4299e1;"></i></td>
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.year}</td>
-            <td class="success-sim">${book.successSim}%</td>
-            <td class="sales-point">${book.salesPoint}</td>
-            <td class="nyt-sim">${book.nytSim}%</td>
-            <td class="final-score">${book.finalScore}</td>
-        `;
-        
-        // Add click event for detailed view
-        row.addEventListener('click', () => {
-            showBookDetail(book);
-        });
-        
-        tbody.appendChild(row);
-    });
-}
-
-// Show book detail in sidebar
-function showBookDetail(book) {
-    const bookDetail = document.getElementById('book-detail');
-    
-    bookDetail.innerHTML = `
-        <div class="book-cover">
-            <i class="fas fa-book" style="font-size: 3rem; color: #4299e1;"></i>
-        </div>
-        <div class="book-info">
-            <h4>${book.title}</h4>
-            <p><strong>Author:</strong> ${book.author}</p>
-            <p><strong>Published:</strong> ${book.year}</p>
-            <p><strong>ISBN:</strong> ${book.isbn}</p>
-            <div class="book-scores">
-                <div class="score-item">
-                    <span>Success Sim.</span>
-                    <span>${book.successSim}%</span>
-                </div>
-                <div class="score-item">
-                    <span>Sales Point</span>
-                    <span>${book.salesPoint}</span>
-                </div>
-                <div class="score-item">
-                    <span>NYT Sim.</span>
-                    <span>${book.nytSim}%</span>
-                </div>
-                <div class="score-item final">
-                    <span>Final Score</span>
-                    <span>${book.finalScore}</span>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add animation
-    bookDetail.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-        bookDetail.style.transform = 'scale(1)';
-    }, 100);
-}
-
-// Set up sidebar interactions
-function setupSidebarInteractions() {
-    // Sort functionality
-    const sortSelect = document.getElementById('sidebar-sort');
-    sortSelect.addEventListener('change', function() {
-        sortRankingTable(this.value);
-    });
-    
-    // Export functionality
-    const exportBtn = document.querySelector('.export-btn');
-    exportBtn.addEventListener('click', function() {
-        exportRankingData();
-    });
-    
-    // Curation tool
-    const curateBtn = document.querySelector('.curate-btn');
-    curateBtn.addEventListener('click', function() {
-        performCuration();
-    });
-}
-
-// Sort ranking table
-function sortRankingTable(sortBy) {
-    const tbody = document.getElementById('ranking-tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    
-    rows.sort((a, b) => {
-        let aValue, bValue;
-        
-        switch(sortBy) {
-            case 'success-sim':
-                aValue = parseFloat(a.querySelector('.success-sim').textContent);
-                bValue = parseFloat(b.querySelector('.success-sim').textContent);
-                break;
-            case 'sales-point':
-                aValue = parseFloat(a.querySelector('.sales-point').textContent);
-                bValue = parseFloat(b.querySelector('.sales-point').textContent);
-                break;
-            case 'nyt-sim':
-                aValue = parseFloat(a.querySelector('.nyt-sim').textContent);
-                bValue = parseFloat(b.querySelector('.nyt-sim').textContent);
-                break;
-            case 'final-score':
-            default:
-                aValue = parseFloat(a.querySelector('.final-score').textContent);
-                bValue = parseFloat(b.querySelector('.final-score').textContent);
-                break;
-        }
-        
-        return bValue - aValue; // Descending order
-    });
-    
-    // Reorder rows
-    rows.forEach((row, index) => {
-        const rankCell = row.querySelector('td:first-child');
-        rankCell.textContent = index + 1;
-        tbody.appendChild(row);
-    });
-}
-
-// Export ranking data
-function exportRankingData() {
-    const table = document.querySelector('.ranking-table');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    
-    let csv = 'Rank,ISBN,Title,Author,Published Year,Success Sim,Sales Point,NYT Sim,Final Score\n';
-    
-    rows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td'));
-        const rowData = cells.map(cell => {
-            let text = cell.textContent.trim();
-            // Escape quotes in CSV
-            if (text.includes(',')) {
-                text = `"${text}"`;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
             }
-            return text;
-        });
-        csv += rowData.join(',') + '\n';
+        }
     });
     
-    // Create download link
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'k-literature-ranking.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    // Bestseller similarity chart
+    const bestsellerCtx = document.getElementById('bestseller-chart').getContext('2d');
+    new Chart(bestsellerCtx, {
+        type: 'bar',
+        data: {
+            labels: ['High', 'Medium', 'Low'],
+            datasets: [{
+                label: 'Similarity Level',
+                data: [45, 35, 20],
+                backgroundColor: [
+                    '#48bb78',
+                    '#ed8936',
+                    '#f56565'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Sentiment analysis chart
+    const sentimentCtx = document.getElementById('sentiment-chart').getContext('2d');
+    new Chart(sentimentCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                data: [60, 30, 10],
+                backgroundColor: [
+                    '#48bb78',
+                    '#ed8936',
+                    '#f56565'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Translation status chart
+    const statusCtx = document.getElementById('status-chart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'In Progress', 'Completed'],
+            datasets: [{
+                data: [70, 20, 10],
+                backgroundColor: [
+                    '#f6ad55',
+                    '#4299e1',
+                    '#48bb78'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Trend analysis chart
+    const trendCtx = document.getElementById('trend-chart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'Translation Success Rate',
+                data: [65, 68, 72, 75, 78, 82],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
 }
 
-// Perform curation
-function performCuration() {
-    const curateBtn = document.querySelector('.curate-btn');
-    const originalText = curateBtn.innerHTML;
-    
-    curateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Curating...';
-    curateBtn.disabled = true;
-    
-    setTimeout(() => {
-        // Simulate curation results
-        showCurationResults();
-        
-        curateBtn.innerHTML = originalText;
-        curateBtn.disabled = false;
-    }, 2000);
+// Update charts with real data
+function updateCharts() {
+    // This would update charts with real data from the CSV files
+    // For now, we'll keep the sample data
 }
 
-// Show curation results
-function showCurationResults() {
-    // This would typically show a modal or update the sidebar
-    // For now, we'll just show an alert
-    alert('Similar books curated! Check the ranking table for updated recommendations.');
-}
-
-// Load sample data for translated books
-function loadSampleData() {
-    const translatedList = document.getElementById('translated-list');
-    
-    const sampleTranslated = [
-        { rank: 1, title: 'The Vegetarian', author: 'Han Kang', bsr: 'Top 1%' },
-        { rank: 2, title: 'Human Acts', author: 'Han Kang', bsr: 'Top 2%' },
-        { rank: 3, title: 'Please Look After Mom', author: 'Shin Kyung-sook', bsr: 'Top 3%' },
-        { rank: 4, title: 'The Hen Who Dreamed She Could Fly', author: 'Sun-mi Hwang', bsr: 'Top 5%' },
-        { rank: 5, title: 'The Guest', author: 'Hwang Sok-yong', bsr: 'Top 8%' }
+// Update personas
+function updatePersonas() {
+    const personasContainer = document.getElementById('personas-container');
+    const personas = [
+        {
+            name: 'Literary Enthusiast',
+            description: 'Prefers character-driven narratives',
+            icon: '📚'
+        },
+        {
+            name: 'Professional Reader',
+            description: 'Values plot complexity and themes',
+            icon: '💼'
+        },
+        {
+            name: 'Casual Reader',
+            description: 'Enjoys accessible, engaging stories',
+            icon: '☕'
+        },
+        {
+            name: 'Academic Reader',
+            description: 'Seeks intellectual depth and cultural insights',
+            icon: '🎓'
+        }
     ];
     
-    translatedList.innerHTML = '';
-    
-    sampleTranslated.forEach(book => {
-        const item = document.createElement('div');
-        item.className = 'translated-item';
-        item.innerHTML = `
-            <div class="translated-rank">${book.rank}</div>
-            <div class="translated-info">
-                <div class="translated-title">${book.title}</div>
-                <div class="translated-author">${book.author}</div>
+    personasContainer.innerHTML = personas.map(persona => `
+        <div class="persona">
+            <div class="persona-avatar">${persona.icon}</div>
+            <div class="persona-info">
+                <h5>${persona.name}</h5>
+                <p>${persona.description}</p>
             </div>
-            <div class="translated-bsr">${book.bsr}</div>
-        `;
-        translatedList.appendChild(item);
-    });
+        </div>
+    `).join('');
 }
 
-// Set up event listeners
+// Update translation status counts
+function updateStatusCounts() {
+    document.getElementById('pending-count').textContent = '70';
+    document.getElementById('in-progress-count').textContent = '20';
+    document.getElementById('completed-count').textContent = '10';
+}
+
+// Setup event listeners
 function setupEventListeners() {
-    // Refresh button
-    const refreshBtn = document.querySelector('.refresh-btn');
-    refreshBtn.addEventListener('click', function() {
-        refreshData();
-    });
-    
-    // Table sort
-    const sortSelect = document.getElementById('sort-select');
-    sortSelect.addEventListener('change', function() {
-        sortRankingTable(this.value);
-    });
-    
-    // Window resize
-    window.addEventListener('resize', function() {
-        // Reinitialize charts on resize
-        initializeTrendChart();
-    });
-}
-
-// Refresh data
-function refreshData() {
-    const refreshBtn = document.querySelector('.refresh-btn');
-    const icon = refreshBtn.querySelector('i');
-    
-    // Add spinning animation
-    icon.className = 'fas fa-spinner fa-spin';
-    
-    setTimeout(() => {
-        // Reload data
-        loadSampleData();
-        populateRankingTable();
-        
-        // Reset icon
-        icon.className = 'fas fa-sync-alt';
-        
-        // Show success message
-        showNotification('Data refreshed successfully!', 'success');
-    }, 1500);
+    // Add any additional event listeners here
+    updateStatusCounts();
 }
 
 // Show notification
@@ -820,160 +553,88 @@ function showNotification(message, type = 'info') {
     notification.className = `notification ${type}`;
     notification.textContent = message;
     
-    // Style the notification
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: ${type === 'success' ? '#38a169' : '#4299e1'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
-    
     document.body.appendChild(notification);
     
-    // Animate in
+    // Show notification
     setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
+        notification.classList.add('show');
     }, 100);
     
-    // Remove after 3 seconds
+    // Hide notification after 3 seconds
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+        notification.classList.remove('show');
         setTimeout(() => {
             document.body.removeChild(notification);
         }, 300);
     }, 3000);
 }
 
-// Update current date
-function updateCurrentDate() {
-    const dateElement = document.getElementById('current-date');
-    const now = new Date();
-    const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        weekday: 'long'
-    };
-    dateElement.textContent = now.toLocaleDateString('en-US', options);
+// Load sample data for fallback
+function loadSampleData() {
+    koreanBooks = [
+        {
+            제목: '채식주의자',
+            저자: '한강',
+            출판사: '창비',
+            발행년도: '2007',
+            ISBN: '9788936433598',
+            salespoint: '150',
+            description_cleaned_en: 'A powerful novel about a woman who decides to become a vegetarian',
+            similarity_score: 0.85,
+            market_potential: 92,
+            translation_priority: 0.89
+        },
+        {
+            제목: '82년생 김지영',
+            저자: '조남주',
+            출판사: '민음사',
+            발행년도: '2016',
+            ISBN: '9788937473135',
+            salespoint: '200',
+            description_cleaned_en: 'A novel about the life of a Korean woman born in 1982',
+            similarity_score: 0.78,
+            market_potential: 88,
+            translation_priority: 0.83
+        }
+    ];
+    
+    processData();
+    updateRankingTable();
+    updateBigNumbers();
 }
 
-// Performance optimization: Debounce function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Export functionality
+function exportData() {
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "Title,Author,Publisher,Similarity Score,Market Potential,Translation Priority\n"
+        + filteredBooks.map(book => 
+            `${book.제목},${book.저자},${book.출판사},${(book.similarity_score * 100).toFixed(1)}%,${book.market_potential.toFixed(1)}%,${(book.translation_priority * 100).toFixed(1)}%`
+        ).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "translation_priority_ranking.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('Data exported successfully!', 'success');
 }
 
-// Apply debouncing to scroll events
-const debouncedScrollHandler = debounce(() => {
-    // Handle scroll events if needed
-}, 10);
-
-window.addEventListener('scroll', debouncedScrollHandler);
-
-// Add CSS for additional styling
-const additionalStyles = `
-    .book-info {
-        margin-top: 1rem;
+// Add export button functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add export button if it doesn't exist
+    if (!document.getElementById('export-btn')) {
+        const rankingSection = document.querySelector('.ranking-section');
+        const header = rankingSection.querySelector('h3');
+        const exportBtn = document.createElement('button');
+        exportBtn.id = 'export-btn';
+        exportBtn.className = 'filter-btn';
+        exportBtn.textContent = 'Export Data';
+        exportBtn.style.marginLeft = '10px';
+        exportBtn.addEventListener('click', exportData);
+        
+        header.appendChild(exportBtn);
     }
-    
-    .book-info h4 {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #1a202c;
-    }
-    
-    .book-info p {
-        font-size: 0.9rem;
-        color: #4a5568;
-        margin-bottom: 0.25rem;
-    }
-    
-    .book-scores {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .score-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem;
-        background: #f7fafc;
-        border-radius: 6px;
-        font-size: 0.9rem;
-    }
-    
-    .score-item.final {
-        background: #ebf8ff;
-        font-weight: 600;
-        color: #2b6cb0;
-    }
-    
-    .translated-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        background: #f7fafc;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .translated-rank {
-        width: 24px;
-        height: 24px;
-        background: #4299e1;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    
-    .translated-info {
-        flex: 1;
-    }
-    
-    .translated-title {
-        font-weight: 600;
-        color: #1a202c;
-        font-size: 0.9rem;
-    }
-    
-    .translated-author {
-        font-size: 0.8rem;
-        color: #718096;
-    }
-    
-    .translated-bsr {
-        font-size: 0.8rem;
-        color: #38a169;
-        font-weight: 600;
-    }
-`;
-
-// Inject additional styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
-
-console.log('K-Literature Translation Intelligence Platform loaded successfully!'); 
+});
