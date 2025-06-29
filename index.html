@@ -5,366 +5,273 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Literature Translation Intelligence Platform</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="book-logo">
-                    <i class="fas fa-book-open"></i>
+    <div class="dashboard-container">
+        <!-- Left Column: Navigator -->
+        <div class="left-column">
+            <div class="navigator">
+                <div class="nav-header">
+                    <h2>K-Lit Navigator</h2>
                 </div>
-                <h1>K-Literature Translation Intelligence Platform</h1>
-            </div>
-            <div class="header-actions">
-                <button class="refresh-btn">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh Data
-                </button>
-                <div class="date-display">
-                    <i class="fas fa-calendar"></i>
-                    <span id="current-date"></span>
+                <div class="nav-section">
+                    <h3>Categories</h3>
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-link active" data-category="all">All Candidates</a></li>
+                        <li><a href="#" class="nav-link" data-category="fiction">Fiction</a></li>
+                        <li><a href="#" class="nav-link" data-category="non-fiction">Non-Fiction</a></li>
+                        <li><a href="#" class="nav-link" data-category="romance">Romance</a></li>
+                        <li><a href="#" class="nav-link" data-category="thriller">Thriller</a></li>
+                        <li><a href="#" class="nav-link" data-category="literary">Literary</a></li>
+                    </ul>
+                </div>
+                <div class="nav-section">
+                    <h3>Market Analysis</h3>
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-link" data-category="domestic">Domestic Popularity</a></li>
+                        <li><a href="#" class="nav-link" data-category="international">International Appeal</a></li>
+                        <li><a href="#" class="nav-link" data-category="similar">Similar Books</a></li>
+                    </ul>
+                </div>
+                <div class="nav-section">
+                    <h3>Translation Status</h3>
+                    <ul class="nav-list">
+                        <li><a href="#" class="nav-link" data-category="pending">Pending</a></li>
+                        <li><a href="#" class="nav-link" data-category="in-progress">In Progress</a></li>
+                        <li><a href="#" class="nav-link" data-category="completed">Completed</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </header>
 
-    <div class="dashboard-container">
-        <!-- Left Navigation -->
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <h3>Navigator</h3>
-                <ul class="nav-menu">
-                    <li class="nav-item active" data-filter="all">
-                        <i class="fas fa-list"></i>
-                        <span>전체 (All)</span>
-                    </li>
-                    <li class="nav-item" data-filter="candidates">
-                        <i class="fas fa-star"></i>
-                        <span>K-Lit Candidates</span>
-                    </li>
-                    <li class="nav-item" data-filter="popularity">
-                        <i class="fas fa-fire"></i>
-                        <span>국내 인기도 (Domestic Popularity)</span>
-                    </li>
-                    <li class="nav-item" data-filter="nyt-similarity">
-                        <i class="fas fa-chart-line"></i>
-                        <span>NYT 유사도 (NYT Bestseller Similarity)</span>
-                    </li>
-                </ul>
+        <!-- Center Column: Main Content -->
+        <div class="center-column">
+            <!-- Big Numbers Section -->
+            <div class="big-numbers-container">
+                <div class="big-number-card">
+                    <div class="big-number" id="total-books">0</div>
+                    <div class="big-number-label">Total Books</div>
+                </div>
+                <div class="big-number-card">
+                    <div class="big-number" id="avg-similarity">0.0</div>
+                    <div class="big-number-label">Avg Similarity</div>
+                </div>
+                <div class="big-number-card">
+                    <div class="big-number" id="translation-score">0</div>
+                    <div class="big-number-label">Translation Score</div>
+                </div>
+                <div class="big-number-card">
+                    <div class="big-number" id="market-potential">0%</div>
+                    <div class="big-number-label">Market Potential</div>
+                </div>
             </div>
-        </nav>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Key Metrics Section -->
-            <section class="metrics-section">
-                <h2>Key Metrics</h2>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="fas fa-translate"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3>흥행 예측 도서 / 실제 번역 비율</h3>
-                            <div class="metric-value">1,247 / 23%</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                +5.2%
-                            </div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3>평균 Score</h3>
-                            <div class="metric-value">78.5</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                +2.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3>성공작 평균 유사도</h3>
-                            <div class="metric-value">82.3%</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                +3.7%
-                            </div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3>평균 Salespoint</h3>
-                            <div class="metric-value">7.8</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                +0.4
-                            </div>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="metric-content">
-                            <h3>NYT BS 평균 유사도</h3>
-                            <div class="metric-value">75.2%</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                +1.8%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Interactive Prediction Tool -->
-            <section class="prediction-tool">
-                <h2>Interactive Prediction Tool</h2>
-                <div class="prediction-container">
-                    <div class="input-section">
-                        <div class="book-input-wrapper">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="book-search" placeholder="책을 입력하세요 (Enter a book title or ISBN)">
-                            <button class="predict-btn">
-                                <i class="fas fa-magic"></i>
-                                Predict
-                            </button>
-                        </div>
-                    </div>
-                    <div class="prediction-result">
-                        <div class="result-card">
-                            <div class="book-cover-animation">
-                                <div class="book-pages">
-                                    <div class="page page-1"></div>
-                                    <div class="page page-2"></div>
-                                    <div class="page page-3"></div>
-                                </div>
-                            </div>
-                            <div class="result-content">
-                                <h3>번역한다면 흥행할 가능성이 높습니다</h3>
-                                <div class="success-score">
-                                    <span class="score-label">흥행 가능성 (성공률)</span>
-                                    <span class="score-value">87.3%</span>
-                                </div>
-                                <div class="score-breakdown">
-                                    <div class="breakdown-item">
-                                        <span>Success Sim.</span>
-                                        <span>85.2%</span>
-                                    </div>
-                                    <div class="breakdown-item">
-                                        <span>Sales Point</span>
-                                        <span>8.1</span>
-                                    </div>
-                                    <div class="breakdown-item">
-                                        <span>NYT Sim.</span>
-                                        <span>79.4%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Ranking List -->
-            <section class="ranking-section">
-                <div class="section-header">
-                    <h2>Translation Priority Ranking</h2>
-                    <div class="table-controls">
-                        <select id="sort-select">
-                            <option value="final-score">Final Score</option>
-                            <option value="success-sim">Success Sim.</option>
-                            <option value="sales-point">Sales Point</option>
-                            <option value="nyt-sim">NYT Sim.</option>
-                        </select>
-                        <button class="export-btn">
-                            <i class="fas fa-download"></i>
-                            Export
-                        </button>
-                    </div>
-                </div>
+            <!-- Translation Priority Ranking -->
+            <div class="ranking-section">
+                <h3>Translation Priority Ranking</h3>
                 <div class="table-container">
-                    <table class="ranking-table">
+                    <table class="ranking-table" id="ranking-table">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>ISBN</th>
-                                <th>COVER?</th>
-                                <th>Title</th>
+                                <th>Rank</th>
+                                <th>Book Title</th>
                                 <th>Author</th>
-                                <th>Published Year</th>
-                                <th>Success Sim.</th>
-                                <th>Sales Point</th>
-                                <th>NYT Sim.</th>
-                                <th>Final Score</th>
+                                <th>Similarity Score</th>
+                                <th>Market Potential</th>
+                                <th>Translation Priority</th>
                             </tr>
                         </thead>
                         <tbody id="ranking-tbody">
-                            <!-- Table rows will be populated by JavaScript -->
+                            <!-- Data will be populated by JavaScript -->
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </div>
+
+            <!-- Interactive Prediction Tool -->
+            <div class="prediction-section">
+                <h3>Translation Success Predictor</h3>
+                <div class="prediction-tool">
+                    <div class="book-preview">
+                        <div class="book-cover" id="book-cover">
+                            <div class="book-spine"></div>
+                            <div class="book-pages">
+                                <div class="page" id="page-1"></div>
+                                <div class="page" id="page-2"></div>
+                                <div class="page" id="page-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="prediction-content">
+                        <div class="prediction-inputs">
+                            <input type="text" id="book-title-input" placeholder="Enter book title..." />
+                            <button id="predict-btn">Predict Success</button>
+                        </div>
+                        <div class="prediction-result" id="prediction-result">
+                            <div class="success-probability">
+                                <span id="success-percentage">0%</span>
+                                <span>Success Probability</span>
+                            </div>
+                            <div class="prediction-factors">
+                                <div class="factor">
+                                    <span class="factor-label">Market Similarity</span>
+                                    <div class="factor-bar">
+                                        <div class="factor-fill" id="similarity-bar"></div>
+                                    </div>
+                                </div>
+                                <div class="factor">
+                                    <span class="factor-label">Reader Appeal</span>
+                                    <div class="factor-bar">
+                                        <div class="factor-fill" id="appeal-bar"></div>
+                                    </div>
+                                </div>
+                                <div class="factor">
+                                    <span class="factor-label">Genre Demand</span>
+                                    <div class="factor-bar">
+                                        <div class="factor-fill" id="demand-bar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- US Market Analysis -->
-            <section class="market-analysis">
-                <h2>US Market Analysis (NYT Bestseller 분석)</h2>
+            <div class="market-analysis-section">
+                <h3>US Market Analysis</h3>
                 <div class="analysis-grid">
                     <div class="analysis-card">
-                        <h3>Description-based Cluster</h3>
-                        <div class="cluster-visualization">
-                            <div class="bubble-chart">
-                                <div class="bubble" style="--size: 80px; --x: 20%; --y: 30%;">Romance</div>
-                                <div class="bubble" style="--size: 65px; --x: 60%; --y: 20%;">Thriller</div>
-                                <div class="bubble" style="--size: 90px; --x: 40%; --y: 60%;">Fiction</div>
-                                <div class="bubble" style="--size: 55px; --x: 80%; --y: 50%;">Mystery</div>
-                                <div class="bubble" style="--size: 70px; --x: 10%; --y: 70%;">Drama</div>
-                            </div>
+                        <h4>Genre Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="genre-chart"></canvas>
                         </div>
                     </div>
                     <div class="analysis-card">
-                        <h3>Marketing Expression</h3>
-                        <div class="marketing-phrases">
-                            <div class="phrase-tag">"Heart-wrenching"</div>
-                            <div class="phrase-tag">"Page-turner"</div>
-                            <div class="phrase-tag">"Emotional journey"</div>
-                            <div class="phrase-tag">"Unforgettable characters"</div>
-                            <div class="phrase-tag">"Gripping narrative"</div>
-                            <div class="phrase-tag">"Masterful storytelling"</div>
+                        <h4>Bestseller Similarity</h4>
+                        <div class="chart-container">
+                            <canvas id="bestseller-chart"></canvas>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
             <!-- US Reader Analysis -->
-            <section class="reader-analysis">
-                <h2>US Reader Analysis (NYT-based Reader 분석)</h2>
-                <div class="reader-grid">
-                    <div class="reader-card">
-                        <h3>Reader Personas</h3>
-                        <div class="persona-list">
-                            <div class="persona">
-                                <div class="persona-avatar">
-                                    <i class="fas fa-user-graduate"></i>
-                                </div>
-                                <div class="persona-info">
-                                    <h4>Literary Enthusiast</h4>
-                                    <p>Prefers character-driven narratives</p>
-                                </div>
-                            </div>
-                            <div class="persona">
-                                <div class="persona-avatar">
-                                    <i class="fas fa-user-tie"></i>
-                                </div>
-                                <div class="persona-info">
-                                    <h4>Professional Reader</h4>
-                                    <p>Values plot complexity and themes</p>
-                                </div>
-                            </div>
+            <div class="reader-analysis-section">
+                <h3>US Reader Analysis</h3>
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Reader Personas</h4>
+                        <div class="personas-container" id="personas-container">
+                            <!-- Personas will be populated by JavaScript -->
                         </div>
                     </div>
-                    <div class="reader-card">
-                        <h3>Sentiment-based Reader Cluster</h3>
-                        <div class="sentiment-chart">
-                            <div class="sentiment-bar positive">
-                                <span>Positive (45%)</span>
-                                <div class="bar-fill" style="width: 45%"></div>
-                            </div>
-                            <div class="sentiment-bar neutral">
-                                <span>Neutral (35%)</span>
-                                <div class="bar-fill" style="width: 35%"></div>
-                            </div>
-                            <div class="sentiment-bar negative">
-                                <span>Negative (20%)</span>
-                                <div class="bar-fill" style="width: 20%"></div>
-                            </div>
+                    <div class="analysis-card">
+                        <h4>Sentiment Analysis</h4>
+                        <div class="chart-container">
+                            <canvas id="sentiment-chart"></canvas>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
 
-        <!-- Right Sidebar -->
-        <aside class="right-sidebar">
-            <!-- Filters -->
-            <div class="sidebar-section">
+        <!-- Right Column: Filters and Performance -->
+        <div class="right-column">
+            <!-- Filters Section -->
+            <div class="filters-section">
                 <h3>Filters</h3>
                 <div class="filter-group">
-                    <label>Sort by:</label>
-                    <select id="sidebar-sort">
-                        <option value="success-sim">Success Sim.</option>
-                        <option value="sales-point">Sales Point</option>
-                        <option value="nyt-sim">NYT Sim.</option>
-                        <option value="final-score">Final Score</option>
+                    <label>Genre</label>
+                    <select id="genre-filter">
+                        <option value="">All Genres</option>
+                        <option value="fiction">Fiction</option>
+                        <option value="romance">Romance</option>
+                        <option value="thriller">Thriller</option>
+                        <option value="literary">Literary</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label>Similarity Range</label>
+                    <div class="range-slider">
+                        <input type="range" id="similarity-min" min="0" max="1" step="0.1" value="0">
+                        <input type="range" id="similarity-max" min="0" max="1" step="0.1" value="1">
+                        <span id="similarity-range">0.0 - 1.0</span>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Publication Year</label>
+                    <div class="year-range">
+                        <input type="number" id="year-min" placeholder="Min Year" min="1900" max="2024">
+                        <input type="number" id="year-max" placeholder="Max Year" min="1900" max="2024">
+                    </div>
+                </div>
+                <button id="apply-filters" class="filter-btn">Apply Filters</button>
             </div>
 
             <!-- Detailed View -->
-            <div class="sidebar-section">
-                <h3>Detailed View</h3>
-                <div class="book-detail" id="book-detail">
-                    <div class="book-cover-placeholder">
-                        <i class="fas fa-book"></i>
-                        <p>Select a book from the ranking list</p>
+            <div class="detailed-view-section">
+                <h3>Book Details</h3>
+                <div class="book-details" id="book-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Title:</span>
+                        <span class="detail-value" id="detail-title">Select a book</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Author:</span>
+                        <span class="detail-value" id="detail-author">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Publisher:</span>
+                        <span class="detail-value" id="detail-publisher">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">ISBN:</span>
+                        <span class="detail-value" id="detail-isbn">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Similarity Score:</span>
+                        <span class="detail-value" id="detail-similarity">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Description:</span>
+                        <p class="detail-description" id="detail-description">-</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Currently Translated Books Status -->
-            <div class="sidebar-section">
-                <h3>현재 번역된 도서 현황</h3>
-                <div class="translation-metrics">
-                    <div class="metric-item">
-                        <span class="metric-label">번역서 전체 대비 %</span>
-                        <span class="metric-value">23.4%</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">출간돼서 비율</span>
-                        <span class="metric-value">18.7%</span>
-                    </div>
-                    <div class="metric-item">
-                        <span class="metric-label">BSR 평균 상위 %</span>
-                        <span class="metric-value">12.3%</span>
-                    </div>
+            <!-- Translation Status -->
+            <div class="translation-status-section">
+                <h3>Translation Status</h3>
+                <div class="status-chart">
+                    <canvas id="status-chart"></canvas>
                 </div>
-                <div class="top-translated">
-                    <h4>Top Translated Books</h4>
-                    <div class="translated-list" id="translated-list">
-                        <!-- Will be populated by JavaScript -->
+                <div class="status-summary">
+                    <div class="status-item">
+                        <span class="status-dot pending"></span>
+                        <span>Pending: <span id="pending-count">0</span></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-dot in-progress"></span>
+                        <span>In Progress: <span id="in-progress-count">0</span></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-dot completed"></span>
+                        <span>Completed: <span id="completed-count">0</span></span>
                     </div>
                 </div>
             </div>
 
             <!-- Trend Analysis -->
-            <div class="sidebar-section">
-                <h3>출판연도 별 흥행도서 추이</h3>
+            <div class="trend-analysis-section">
+                <h3>Trend Analysis</h3>
                 <div class="trend-chart">
-                    <canvas id="trend-canvas"></canvas>
-                </div>
-                <div class="curation-tool">
-                    <h4>위 도서와 유사한 레이블 도서 큐레이팅</h4>
-                    <button class="curate-btn">
-                        <i class="fas fa-magic"></i>
-                        Curate Similar Books
-                    </button>
+                    <canvas id="trend-chart"></canvas>
                 </div>
             </div>
-        </aside>
+        </div>
     </div>
 
     <script src="script.js"></script>
